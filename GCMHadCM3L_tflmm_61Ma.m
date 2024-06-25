@@ -83,7 +83,7 @@ opt_makeseds=true;             % [false/true] make sediment files
 %
 opt_filtermask=true;           % [false/true] filter land-sea mask?
 opt_filtertopo=true;           % [false/true] filter topography?
-opt_makepoleswide=false;        % [false/true] force wide polar island zone
+opt_makepoleswide=true;        % [false/true] force wide polar island zone
 par_min_oceann=20;             % [0-9999] minimum lake size (# cells)
 %
 % *** ENVIRONMENT/OTHER SETTINGS **************************************** %

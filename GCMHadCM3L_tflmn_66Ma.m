@@ -39,13 +39,13 @@ par_nc_coupl_name = '';        % ['STRING'] optional .nc name
 %
 par_max_i=36;                  % [1-72] # grid cells in longitude dir (i)
 par_max_j=36;                  % [1-72] # grid cells in latitude  dir (j)
-par_max_k=17;                  % [1-99] # depth leves in ocean
+par_max_k=16;                  % [1-99] # depth leves in ocean
 opt_equalarea=true;            % [false/true] equal area grid?
 %
 % *** REGRIDDING SETTINGS *********************************************** %
 %
 par_max_D=5000.0;              % [0.0-99999.9] max grid depth (m)
-par_add_Dk=1;                  % [0-99] # of ocean levels that are 'extra' 
+par_add_Dk=0;                  % [0-99] # of ocean levels that are 'extra' 
 par_min_Dk=2;                  % [1-99] minimum ocean depth (as # levels)
 par_min_k=1;                   % [1-99] maximum ocean depth (k value)
 par_lon_off=-260.0;            % [-360-0] longitude offset of grid start
@@ -83,7 +83,7 @@ opt_makeseds=true;             % [false/true] make sediment files
 %
 opt_filtermask=true;           % [false/true] filter land-sea mask?
 opt_filtertopo=true;           % [false/true] filter topography?
-opt_makepoleswide=false;        % [false/true] force wide polar island zone
+opt_makepoleswide=true;        % [false/true] force wide polar island zone
 par_min_oceann=20;             % [0-9999] minimum lake size (# cells)
 %
 % *** ENVIRONMENT/OTHER SETTINGS **************************************** %
