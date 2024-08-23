@@ -16,9 +16,9 @@
 %
 % *** CONFIG NAME AND MAIN INPUT SETTINGS ******************************* %
 %
-par_wor_name='wortflmh';       % ['STRING'] 8-char (output) config name
+par_wor_name='wortflme';       % ['STRING'] 8-char (output) config name
 par_gcm='hadcm3l';             % ['STRING'] input format/GCM name
-par_expid='tflmh';             % ['STRING'] input experiment/data name
+par_expid='tflme';             % ['STRING'] input experiment/data name
 %
 % *** FILE PATHS ******************************************************** %
 %
@@ -60,7 +60,7 @@ opt_highresseds=false;         % [false/true] create 2x res sediment grid
 %
 par_runoffopt=0;               % [0/1] run-off generation option
 par_tauopt=0;                  % [0/1/2] zonal windstress generation option
-par_age=36.0;                   % [0.0-4570.0] optional age (Myr)
+par_age=20.0;                   % [0.0-4570.0] optional age (Myr)
 %
 % *** OPTIONS -- MAIN *************************************************** %
 %

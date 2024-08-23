@@ -16,9 +16,9 @@
 %
 % *** CONFIG NAME AND MAIN INPUT SETTINGS ******************************* %
 %
-par_wor_name='wortflmh';       % ['STRING'] 8-char (output) config name
+par_wor_name='wortflma';       % ['STRING'] 8-char (output) config name
 par_gcm='hadcm3l';             % ['STRING'] input format/GCM name
-par_expid='tflmh';             % ['STRING'] input experiment/data name
+par_expid='tflma';             % ['STRING'] input experiment/data name
 %
 % *** FILE PATHS ******************************************************** %
 %
@@ -60,12 +60,12 @@ opt_highresseds=false;         % [false/true] create 2x res sediment grid
 %
 par_runoffopt=0;               % [0/1] run-off generation option
 par_tauopt=0;                  % [0/1/2] zonal windstress generation option
-par_age=36.0;                   % [0.0-4570.0] optional age (Myr)
+par_age=0.01;                   % [0.0-4570.0] optional age (Myr)
 %
 % *** OPTIONS -- MAIN *************************************************** %
 %
 opt_makeall=false;             % [false/true] apply all common options?
-opt_user=false;                 % [false/true] enable user input to grid
+opt_user=true;                 % [false/true] enable user input to grid
 opt_plots=false;                % [false/true] plot all input and output?
 %
 % *** OPTIONS -- DATA GENERATION **************************************** %
@@ -81,10 +81,10 @@ opt_makeseds=true;             % [false/true] make sediment files
 %
 % *** OPTIONS -- GRID FILTERING ***************************************** %
 %
-opt_filtermask=true;           % [false/true] filter land-sea mask?
+opt_filtermask=false;           % [false/true] filter land-sea mask?
 opt_filtertopo=true;           % [false/true] filter topography?
 opt_makepoleswide=true;        % [false/true] force wide polar island zone
-par_min_oceann=20;             % [0-9999] minimum lake size (# cells)
+par_min_oceann=15;             % [0-9999] minimum lake size (# cells)
 %
 % *** ENVIRONMENT/OTHER SETTINGS **************************************** %
 %
