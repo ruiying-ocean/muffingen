@@ -326,6 +326,7 @@ if strcmp(par_gcm,'um'),      par_gcm = 'hadcm3';  end
 if strcmp(par_gcm,'UM'),      par_gcm = 'hadcm3';  end
 if strcmp(par_gcm,'FOAM'),    par_gcm = 'foam';    end
 if strcmp(par_gcm,'CESM'),    par_gcm = 'cesm';    end
+if strcmp(par_gcm,'CMIP6'),   par_gcm = 'cmip6';   end
 if strcmp(par_gcm,'ROCKEE'),  par_gcm = 'rockee';  end
 if strcmp(par_gcm,'K1'),      par_gcm = 'k1';      end
 if strcmp(par_gcm,'.k1'),     par_gcm = 'k1';      end
@@ -359,7 +360,7 @@ if opt_makeseds
 end
 % adjust options according to input (GCM) type
 switch par_gcm
-    case {'hadcm3','hadcm3l','foam','cesm','rockee'}
+    case {'hadcm3','hadcm3l','foam','cesm','rockee','cmip6'}
     case {'k1','mask','k2','mat'}
     otherwise
         opt_makeall=false;
@@ -409,6 +410,14 @@ switch par_gcm
         if isempty(par_nc_atmos_name), par_nc_atmos_name = par_nc_topo_name; end
         if isempty(par_nc_ocean_name), par_nc_ocean_name = par_nc_topo_name; end
         if isempty(par_nc_coupl_name), par_nc_coupl_name = par_nc_topo_name; end
+    case {'cmip6'}
+        % CMIP6: leave names as provided; recommend explicit names per variable family
+        if isempty(par_nc_topo_name),  par_nc_topo_name  = ''; end
+        if isempty(par_nc_mask_name),  par_nc_mask_name  = ''; end
+        if isempty(par_nc_axes_name),  par_nc_axes_name  = par_nc_topo_name; end
+        if isempty(par_nc_atmos_name), par_nc_atmos_name = ''; end
+        if isempty(par_nc_ocean_name), par_nc_ocean_name = ''; end
+        if isempty(par_nc_coupl_name), par_nc_coupl_name = par_nc_atmos_name; end
     case ('rockee')
         if isempty(par_nc_topo_name),  par_nc_topo_name  = ''; end
         if isempty(par_nc_mask_name),  par_nc_mask_name  = par_nc_topo_name; end
@@ -426,6 +435,8 @@ switch par_gcm
     case ('foam')
         if ~exist('par_wspeed_avstr','var'), par_wspeed_avstr = 'uvaa'; end
     case {'cesm'}
+        if ~exist('par_wspeed_avstr','var'), par_wspeed_avstr = 'wsma'; end
+    case {'cmip6'}
         if ~exist('par_wspeed_avstr','var'), par_wspeed_avstr = 'wsma'; end
     case {'rockee'}
         if ~exist('par_wspeed_avstr','var'), par_wspeed_avstr = 'wsaa'; end
@@ -550,7 +561,7 @@ if (length(par_wor_name) ~= 8)
 end
 % check GCM options
 switch str(1).gcm
-    case {'hadcm3','hadcm3l','foam','cesm','rockee'}
+    case {'hadcm3','hadcm3l','foam','cesm','rockee','cmip6'}
         disp(['       * GCM == ' str(1).gcm ' (OK)']);
     case {'mat'}
         disp(['       * A high resolution topography (only) file: ' str(1).exp]);
@@ -568,7 +579,7 @@ end
 % check compatibility of GCM with muffingen settings
 switch str(1).gcm
     case {'hadcm3','hadcm3l','foam'}
-    case {'cesm','rockee'}
+    case {'cesm','rockee','cmip6'}
         opt_makeents=false;
         disp(['       * ERROR: ' str(1).gcm ' input is not (yet) supported to generate ENTS fields :(']);
         disp(['         ----> set opt_makeents=.FALSE. and continue muffingen']);
@@ -593,7 +604,7 @@ n_step = n_step+1;
 disp(['>   ' num2str(n_step) '. READING AXES INFORMATION ...']);
 %
 switch str(1).gcm
-    case {'hadcm3','hadcm3l','foam','cesm','rockee'}
+    case {'hadcm3','hadcm3l','foam','cesm','cmip6','rockee'}
         % read axes
         if strcmp(str(1).gcm,'hadcm3')
             % NOTE: axes need to be re-generated later (for winds etc.)
@@ -603,7 +614,9 @@ switch str(1).gcm
         elseif strcmp(str(1).gcm,'foam')
             [gi_loncm,gi_lonce,gi_latcm,gi_latce,gi_lonpm,gi_lonpe,gi_latpm,gi_latpe,gi_lonam,gi_lonae,gi_latam,gi_latae] = fun_read_axes_foam(str);
         elseif strcmp(str(1).gcm,'cesm')
-             [gi_loncm,gi_lonce,gi_latcm,gi_latce,gi_lonam,gi_lonae,gi_latam,gi_latae] = fun_read_axes_cesm(str);
+            [gi_loncm,gi_lonce,gi_latcm,gi_latce,gi_lonam,gi_lonae,gi_latam,gi_latae] = fun_read_axes_cesm(str);
+        elseif strcmp(str(1).gcm,'cmip6')
+            [gi_loncm,gi_lonce,gi_latcm,gi_latce,gi_lonam,gi_lonae,gi_latam,gi_latae] = fun_read_axes_cmip6(str);
         elseif strcmp(str(1).gcm,'rockee')
              [gi_loncm,gi_lonce,gi_latcm,gi_latce,gi_lonam,gi_lonae,gi_latam,gi_latae] = fun_read_axes_rockee(str);
         else
@@ -633,7 +646,7 @@ n_step = n_step+1;
 disp(['>   ' num2str(n_step) '. READING MASK & TOPO GRIDS ...']);
 %
 switch str(1).gcm
-    case {'hadcm3','hadcm3l','foam','cesm','rockee'}
+    case {'hadcm3','hadcm3l','foam','cesm','cmip6','rockee'}
         % read topo
         if (strcmp(str(1).gcm,'hadcm3') || strcmp(str(1).gcm,'hadcm3l'))
             [gi_mask] = fun_read_omask_hadcm3x(str);
@@ -642,6 +655,66 @@ switch str(1).gcm
             [gi_topo,gi_mask] = fun_read_topomask_foam(str);
         elseif strcmp(str(1).gcm,'cesm')
             [gi_topo,gi_mask] = fun_read_topomask_cesm(str);
+        elseif strcmp(str(1).gcm,'cmip6')
+            fprintf('       - Reading CMIP6 topo & mask from: %s\n', str(2).nc);
+            [gi_topo,gi_mask] = fun_read_topomask_cmip6(str);
+            % Sanity: enforce [lat x lon] shape and plausible land fraction
+            latmax_in = length(gi_latce)-1; lonmax_in = length(gi_lonce)-1;
+            szm = size(gi_mask); szt = size(gi_topo);
+            % Try to coerce to [lat x lon]
+            if ~(numel(szm)==2 && szm(1)==latmax_in && szm(2)==lonmax_in)
+                if numel(szm)==2 && szm(1)==lonmax_in && szm(2)==latmax_in
+                    gi_mask = gi_mask';
+                else
+                    % As a last resort, squeeze and try transpose
+                    gi_mask = squeeze(gi_mask);
+                    if size(gi_mask,1)==lonmax_in && size(gi_mask,2)==latmax_in
+                        gi_mask = gi_mask';
+                    end
+                end
+            end
+            if ~(numel(szt)==2 && szt(1)==latmax_in && szt(2)==lonmax_in)
+                if numel(szt)==2 && szt(1)==lonmax_in && szt(2)==latmax_in
+                    gi_topo = gi_topo';
+                else
+                    gi_topo = squeeze(gi_topo);
+                    if size(gi_topo,1)==lonmax_in && size(gi_topo,2)==latmax_in
+                        gi_topo = gi_topo';
+                    end
+                end
+            end
+            % If still inconsistent, bail gracefully
+            if ~(size(gi_mask,1)==latmax_in && size(gi_mask,2)==lonmax_in)
+                warning('CMIP6 mask size mismatch with axes; attempting fallback orientation.');
+                try
+                    gi_mask = gi_mask(1:latmax_in,1:lonmax_in);
+                catch
+                    gi_mask = gi_mask';
+                end
+            end
+            if ~(size(gi_topo,1)==latmax_in && size(gi_topo,2)==lonmax_in)
+                warning('CMIP6 topo size mismatch with axes; attempting fallback orientation.');
+                try
+                    gi_topo = gi_topo(1:latmax_in,1:lonmax_in);
+                catch
+                    gi_topo = gi_topo';
+                end
+            end
+            % Compute area fractions forward and with transpose to detect flips
+            try
+                [si_fareaA,~] = fun_grid_calc_ftotarea(gi_mask,gi_lonce,gi_latce);
+                [si_fareaB,~] = fun_grid_calc_ftotarea(gi_mask',gi_lonce,gi_latce);
+                landA = 1.0 - si_fareaA; landB = 1.0 - si_fareaB;
+                target_land = 0.29;
+                if abs(landB - target_land) < abs(landA - target_land)
+                    gi_mask = gi_mask';
+                    gi_topo = gi_topo';
+                end
+            catch
+                % ignore
+            end
+            % Ensure land is NaN in topo for clearer plotting/processing
+            gi_topo(gi_mask==0) = NaN;
         elseif strcmp(str(1).gcm,'rockee')
             [gi_topo,gi_mask] = fun_read_topomask_rockee(str);
         end
@@ -691,7 +764,7 @@ n_step = n_step+1;
 disp(['>   ' num2str(n_step) '. RE-GRIDING MASK ...']);
 %
 switch str(1).gcm
-    case {'hadcm3','hadcm3l','foam','cesm','rockee','mat'}
+    case {'hadcm3','hadcm3l','foam','cesm','cmip6','rockee','mat'}
         % initial re-gridding of mask
         % NOTE: need to transpose around [gi_mask] to have correct input format
         %       to make_regrid_2d
@@ -866,7 +939,7 @@ if opt_maketopo
     disp(['>   ' num2str(n_step) '. RE-GRIDING TOPOGRAPHY ...']);
     %
     switch str(1).gcm
-        case {'hadcm3','hadcm3l','foam','cesm','rockee','mat'}
+        case {'hadcm3','hadcm3l','foam','cesm','cmip6','rockee','mat'}
             % initial re-gridding of topo
             % NOTE: need to transpose around [gi_topo] to have correct input format
             %       to make_regrid_2d
@@ -1238,7 +1311,7 @@ elseif (opt_makewind)
     disp(['>  ' num2str(n_step) '. CREATING WIND PRODUCTS ...']);
     % create GENIE grid wind products
     switch str(1).gcm
-        case {'hadcm3','hadcm3l','foam','cesm','rockee'}
+        case {'hadcm3','hadcm3l','foam','cesm','cmip6','rockee'}
             % re-grid winds from GCM
             % NOTE: the sets of grids and their edges required differ
             %       between hadcm3/hadcm3l and foam
@@ -1248,6 +1321,8 @@ elseif (opt_makewind)
                 make_grid_winds_foam(gi_loncm,gi_lonce,gi_latcm,gi_latce,gi_lonam,gi_lonae,gi_latam,gi_latae,gi_mask,go_lonm,go_lone,go_latm,go_late,go_mask,str,opt_plots);
             elseif (strcmp(str(1).gcm,'cesm'))
                 make_grid_winds_cesm(gi_lonce,gi_latce,gi_mask,go_lonm,go_lone,go_latm,go_late,go_mask,str,opt_plots);
+            elseif (strcmp(str(1).gcm,'cmip6'))
+                make_grid_winds_cmip6(gi_lonce,gi_latce,gi_mask,go_lonm,go_lone,go_latm,go_late,go_mask,str,opt_plots);
             elseif (strcmp(str(1).gcm,'rockee'))
                 make_grid_winds_rockee(gi_lonam,gi_lonae,gi_latam,gi_latae,gi_mask,go_lonm,go_lone,go_latm,go_late,go_mask,str,opt_plots);
             end
@@ -1268,7 +1343,7 @@ if opt_makealbedo
     disp(['>  ' num2str(n_step) '. LOADING PLANETARY ALBEDO DATA ...']);
     %
     switch str(1).gcm
-        case {'hadcm3','hadcm3l','foam','cesm','rockee'}
+        case {'hadcm3','hadcm3l','foam','cesm','cmip6','rockee'}
             % read planetary albedo
             if (strcmp(str(1).gcm,'hadcm3') || strcmp(str(1).gcm,'hadcm3l'))
                 [gi_albd] = fun_read_albd_hadcm3x(str);
@@ -1276,6 +1351,8 @@ if opt_makealbedo
                 [gi_albd] = fun_read_albd_foam(str);
             elseif (strcmp(str(1).gcm,'cesm'))
                 [gi_albd] = fun_read_albd_cesm(str);
+            elseif (strcmp(str(1).gcm,'cmip6'))
+                [gi_albd] = fun_read_albd_cmip6(str);
             elseif (strcmp(str(1).gcm,'rockee'))
                 [gi_albd] = fun_read_albd_rockee(gi_loncm,gi_latcm,str);
             end
@@ -1297,11 +1374,11 @@ if opt_makealbedo
     disp(['>  ' num2str(n_step) '. CREATING PLANETARY ALBEDO DATA ...']);
     %
     switch str(1).gcm
-        case {'hadcm3','hadcm3l','foam','cesm','rockee'}
+        case {'hadcm3','hadcm3l','foam','cesm','cmip6','rockee'}
             % re-grid
             [go_albd,go_falbd] = make_regrid_2d(gi_lonae,gi_latae,gi_albd',go_lone,go_late,opt_debug);
-            go_albd  = go_albd';
-            go_falbd = go_falbd';
+            go_albd  = go_albd';  go_albd  = flipud(go_albd);
+            go_falbd = go_falbd'; go_falbd = flipud(go_falbd);
             disp(['       - Re-gridded GCM planetary albedo data.']);
             % plot output albedo
             if (opt_plots), plot_2dgridded(flipud(go_albd),100.0,'',[[str_dirout '/' str_nameout] '.albd_pl_out'],['albedo out']); end
@@ -1373,13 +1450,13 @@ if opt_makeents
         case {'hadcm3','hadcm3l','foam'}
             % re-grid surface albedo
             [go_albd_sur,go_falbd_sur] = make_regrid_2d(gi_lonae,gi_latae,gi_albd_sur',go_lone,go_late,opt_debug);
-            go_albd_sur  = go_albd_sur';
-            go_falbd_sur = go_falbd_sur';
+            go_albd_sur  = go_albd_sur';  go_albd_sur  = flipud(go_albd_sur);
+            go_falbd_sur = go_falbd_sur'; go_falbd_sur = flipud(go_falbd_sur);
             disp(['       - Re-gridded GCM surface albedo data.']);
             % re-grid cloud albedo
             [go_albd_cl,go_falbd_cl] = make_regrid_2d(gi_lonae,gi_latae,gi_albd_cl',go_lone,go_late,opt_debug);
-            go_albd_cl  = go_albd_cl';
-            go_falbd_cl = go_falbd_cl';
+            go_albd_cl  = go_albd_cl';  go_albd_cl  = flipud(go_albd_cl);
+            go_falbd_cl = go_falbd_cl'; go_falbd_cl = flipud(go_falbd_cl);
             disp(['       - Re-gridded GCM cloud albedo data.']);
             % plot surface and cloud albedo output
             if (opt_plots)
@@ -1641,7 +1718,7 @@ elseif (opt_makewind)
     % NOTE: bg_ctrl_force_windspeed is .true. by default
     % NOTE: par_wspeed_avstr is the averaging product code
     switch str(1).gcm
-        case {'hadcm3','hadcm3l','foam','cesm'}
+        case {'hadcm3','hadcm3l','foam','cesm','cmip6'}
             fprintf(fid,'%s\n',['bg_ctrl_force_windspeed=.true.']);
             fprintf(fid,'%s\n',['bg_par_pindir_name=''../../cgenie.muffin/genie-paleo/',par_wor_name,'/''']);
             fprintf(fid,'%s\n',['bg_par_windspeed_file=''',par_wor_name,'.windspeed_' str(1).wspd '.dat''']);
@@ -1659,7 +1736,7 @@ elseif (opt_makewind)
         case {'foam'}
             fprintf(fid,'%s\n','# gas transfer coeff');
             fprintf(fid,'%s\n',['bg_par_gastransfer_a=',num2str(1.044)]);
-        case {'cesm'}
+        case {'cesm','cmip6'}
             fprintf(fid,'%s\n','# gas transfer coeff');
             switch str(1).wspd
                 case {'uvaa'}

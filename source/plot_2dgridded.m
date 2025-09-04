@@ -236,7 +236,7 @@ set(gcf,'CurrentAxes',fh(1));
 set(gcf,'renderer','painters');
 filename = data_id;
 if (par_mutlab > 2015),
-    print('-dpsc2', '-bestfit', [filename '.' str_date '.ps']);
+    print('-dpdf', '-bestfit', [filename '.' str_date '.ps']);
 else
     print('-dpsc2', [filename '.' str_date '.ps']);
 end
