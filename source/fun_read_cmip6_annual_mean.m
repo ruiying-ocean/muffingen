@@ -12,7 +12,7 @@ function fld = fun_read_cmip6_annual_mean(str, varname, base)
 % Output:
 %   fld     - 2D double [lat,lon], annual mean
 
-ncfile = [str(1).path '/' str(1).exp '/' varname '_' base '.nc'];
+ncfile = [str(1).path '/' str(1).exp '/' base '_' varname '.nc'];
 ncid = netcdf.open(ncfile,'nowrite');
 
 % Read variable

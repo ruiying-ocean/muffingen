@@ -12,7 +12,7 @@ function dat = fun_read_cmip6_timeseries(str, varname, base)
 % Output:
 %   dat     - double [lat,lon,time]
 
-ncfile = [str(1).path '/' str(1).exp '/' varname '_' base '.nc'];
+ncfile = [str(1).path '/' str(1).exp '/' base '_' varname '.nc'];
 ncid = netcdf.open(ncfile,'nowrite');
 
 % Read variable

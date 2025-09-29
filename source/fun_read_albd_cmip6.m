@@ -28,7 +28,7 @@ end
 % Local function: read a CMIP6 variable and return [LAT,LON] annual mean
 % -----------------------------------------------------------------------
 function fld = read_cmip6_2d_ann(varname, base, clamp_eps, str)
-    ncfile = [str(1).path '/' str(1).exp '/' varname '_' base '.nc'];
+    ncfile = [str(1).path '/' str(1).exp '/' base '_' varname '.nc'];  
     ncid = netcdf.open(ncfile,'nowrite');
     varid = netcdf.inqVarID(ncid,varname);
     [~, ~, dimids, ~] = netcdf.inqVar(ncid, varid);

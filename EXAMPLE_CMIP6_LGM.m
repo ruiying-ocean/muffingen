@@ -16,9 +16,9 @@
 %
 % *** CONFIG NAME AND MAIN INPUT SETTINGS ******************************* %
 %
-par_wor_name='mp21lgmA';         % ['STRING'] 8-char (output) config name
+par_wor_name='cmip6lgm';         % ['STRING'] 8-char (output) config name
 par_gcm='cmip6';                 % ['STRING'] input format/GCM name
-par_expid='MPI-ESM-LGM'; % ['STRING'] input experiment/data name
+par_expid='CMIP6-MMM'; % ['STRING'] input experiment/data name
 %
 % *** FILE PATHS ******************************************************** %
 %
@@ -29,13 +29,13 @@ opt_outputdir=false;             % [false/true] ask for output directory?
 %
 % *** GCM netCDF FILENAMES ********************************************** %
 %
-par_nc_topo_name  = 'deptho_1deg';    % ['STRING'] bathymetry file (CDO regridded)
-par_nc_mask_name  = 'sftof_1deg';     % ['STRING'] sea area fraction file (CDO regridded)
-par_nc_axes_name  = 'deptho_1deg';    % ['STRING'] coordinate axes file
+par_nc_topo_name  = 'annual_mmm_deptho';    % ['STRING'] bathymetry file (CDO regridded)
+par_nc_mask_name  = 'annual_mmm_sftof';     % ['STRING'] sea area fraction file (CDO regridded)
+par_nc_axes_name  = '';    % ['STRING'] coordinate axes file
 % Use CDO-regridded 1-degree rectilinear inputs for winds
-par_nc_atmos_name = '1deg'; % ['STRING'] atmospheric data files (uas, vas, sfcWind)
-par_nc_ocean_name = '';          % ['STRING'] ocean data files
-par_nc_coupl_name = '1deg'; % ['STRING'] wind stress files (tauu, tauv)
+par_nc_atmos_name = 'annual_mmm'; % ['STRING'] prefix for atmospheric data files (uas, vas, sfcWind)
+par_nc_ocean_name = 'annual_mmm'; % ['STRING'] prefix for ocean data files
+par_nc_coupl_name = 'annual_mmm'; % ['STRING'] prefix for wind stress files (tauu, tauv)
 %
 % *** GRID RESOLUTION *************************************************** %
 %
@@ -47,11 +47,11 @@ opt_equalarea=true;              % [false/true] equal area grid?
 % *** REGRIDDING SETTINGS *********************************************** %
 %
 par_max_D=5000.0;              % [0.0-99999.9] max grid depth (m)
-par_add_Dk=0;                  % [0-99] # of ocean levels that are 'extra' 
+par_add_Dk=0;                  % [0-99] # of ocean levels that are 'extra'
 par_min_Dk=2;                  % [1-99] minimum ocean depth (as # levels)
 par_min_k=1;                   % [1-99] maximum ocean depth (k value)
 par_lon_off=-260.0;            % [-360-0] longitude offset of grid start
-par_A_frac_threshold=0.45;     % [0.0-1.0] land fractional area threshold  
+par_A_frac_threshold=0.45;     % [0.0-1.0] land fractional area threshold
 par_mask_mask_name = '';       % ['STRING'] mask of land/ocean features
 par_sedsopt=0;                 % [0/1/2] sediment re-gridding option
 par_sed_Dmin=1000.0;           % minimm (random, option 2) sediment depth
@@ -68,7 +68,7 @@ par_wspeed_avstr='uvaa';       % ['uvaa'/'uvma'/'wsma'] windspeed product averag
 % *** OPTIONS -- MAIN *************************************************** %
 %
 opt_makeall=false;            % [false/true] apply all common options?
-opt_user=true;                % [false/true] enable user input to grid
+opt_user=false;                % [false/true] enable user input to grid
 opt_plots=false;               % [false/true] plot all input and output?
 %
 % *** OPTIONS -- DATA GENERATION **************************************** %
