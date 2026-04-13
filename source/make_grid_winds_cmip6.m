@@ -86,17 +86,20 @@ if (optplots), plot_2dgridded(flipud(giwtauu),999.0,'',[[str(2).dir '/' str(2).e
 if (optplots), plot_2dgridded(flipud(giwtauv),999.0,'',[[str(2).dir '/' str(2).exp] '.wtau_v.IN'],['wind stress in -- v']); end
 
 % u: taux(y) at u grid -- apply ocean mask to input to exclude land values
-[gowtauuu,~] = make_regrid_2d(gilone,gilate,(gimaskp.*giwtauu)',golonue,golatue,false);
+% NOTE: gimaskp is derived from gi_mask which has flipud applied in fun_read_topomask_cmip6,
+%       but giwtauu from fun_read_cmip6_annual_mean is NOT flipped; flipud(gimaskp) aligns them.
+gimaskp_tau = flipud(gimaskp);
+[gowtauuu,~] = make_regrid_2d(gilone,gilate,(gimaskp_tau.*giwtauu)',golonue,golatue,false);
 gowtauuu(isnan(gowtauuu)) = 0.0; gowtauuu = gowtauuu'; gowtauuu = flipud(gowtauuu); gowtauuu = gomask.*gowtauuu;
-[gowtauvu,~] = make_regrid_2d(gilone,gilate,(gimaskp.*giwtauv)',golonue,golatue,false);
+[gowtauvu,~] = make_regrid_2d(gilone,gilate,(gimaskp_tau.*giwtauv)',golonue,golatue,false);
 gowtauvu(isnan(gowtauvu)) = 0.0; gowtauvu = gowtauvu'; gowtauvu = flipud(gowtauvu); gowtauvu = gomask.*gowtauvu;
 if (optplots), plot_2dgridded(flipud(gm.*gowtauuu),999.0,'',[[str(2).dir '/' str(2).exp] '.wtau_xATu.out'],['wind stress out -- x @ u']); end
 if (optplots), plot_2dgridded(flipud(gm.*gowtauvu),999.0,'',[[str(2).dir '/' str(2).exp] '.wtau_yATu.out'],['wind stress out -- y @ u']); end
 
 % v: taux(y) at v grid
-[gowtauuv,~] = make_regrid_2d(gilone,gilate,(gimaskp.*giwtauu)',golonve,golatve,false);
+[gowtauuv,~] = make_regrid_2d(gilone,gilate,(gimaskp_tau.*giwtauu)',golonve,golatve,false);
 gowtauuv(isnan(gowtauuv)) = 0.0; gowtauuv = gowtauuv'; gowtauuv = flipud(gowtauuv); gowtauuv = gomask.*gowtauuv;
-[gowtauvv,~] = make_regrid_2d(gilone,gilate,(gimaskp.*giwtauv)',golonve,golatve,false);
+[gowtauvv,~] = make_regrid_2d(gilone,gilate,(gimaskp_tau.*giwtauv)',golonve,golatve,false);
 gowtauvv(isnan(gowtauvv)) = 0.0; gowtauvv = gowtauvv'; gowtauvv = flipud(gowtauvv); gowtauvv = gomask.*gowtauvv;
 if (optplots), plot_2dgridded(flipud(gm.*gowtauuv),999.0,'',[[str(2).dir '/' str(2).exp] '.wtau_xATv.out'],['wind stress out -- x @ v']); end
 if (optplots), plot_2dgridded(flipud(gm.*gowtauvv),999.0,'',[[str(2).dir '/' str(2).exp] '.wtau_yATv.out'],['wind stress out -- y @ v']); end
