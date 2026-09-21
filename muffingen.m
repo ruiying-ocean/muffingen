@@ -293,6 +293,9 @@ if ~exist('opt_plots','var'),    opt_plots    = true; end
 if ~exist('opt_debug','var'),    opt_debug    = false; end
 % make zonal winds (rather than re-grid GCM)?
 if ~exist('opt_makezonalwind','var'), opt_makezonalwind = false; end
+% route the S polar island path along the first all-ocean row at least
+% this deep (m) (0 = follow the coast)
+if ~exist('par_polepath_Dmin','var'), par_polepath_Dmin = 0; end
 % number of bathymetry smoothing passes before levels are assigned (0 = off)
 if ~exist('par_topo_smooth','var'), par_topo_smooth = 0; end
 % set dummy mask nc name
@@ -1089,6 +1092,16 @@ if opt_makeocean
     disp(['>  ' num2str(n_step) '. GENERATING .paths FILE ...']);
     % create paths
     [n_paths,v_paths,n_islands,go_paths] = find_grid_paths(go_borders,n_islands,i_poles);
+    % optionally route the S polar island path through deep water
+    if (par_polepath_Dmin > 0)
+        [n_paths,v_paths,loc_paths,loc_info] = find_grid_polepath_offshore( ...
+            n_paths,v_paths,go_mask,go_k1,go_islands,i_poles,go_de,par_polepath_Dmin);
+        if loc_info.moved
+            go_paths = loc_paths;
+            fprintf('       - S polar island path moved offshore to j = %i (%i steps; was %i, %i of them shallower than %g m)\n', ...
+                loc_info.j,n_paths(end),loc_info.n_before,loc_info.n_shelf_before,par_polepath_Dmin);
+        end
+    end
     % plot paths data
     if (opt_plots), plot_2dgridded(flipud(go_paths),999,'',[[str_dirout '/' str_nameout] '.paths_out.FINAL'],['Paths file -- FINAL']); end
     % save .paths file
