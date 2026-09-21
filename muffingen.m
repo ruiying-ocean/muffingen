@@ -293,6 +293,8 @@ if ~exist('opt_plots','var'),    opt_plots    = true; end
 if ~exist('opt_debug','var'),    opt_debug    = false; end
 % make zonal winds (rather than re-grid GCM)?
 if ~exist('opt_makezonalwind','var'), opt_makezonalwind = false; end
+% number of bathymetry smoothing passes before levels are assigned (0 = off)
+if ~exist('par_topo_smooth','var'), par_topo_smooth = 0; end
 % set dummy mask nc name
 % NOTE: backwards compatability provided by
 %       subsequent default variable name setting
@@ -918,6 +920,11 @@ if opt_maketopo
         case {'k1','k2'}
             disp(['         (Nothing to re-grid as k1 file already loaded.)']);
         otherwise
+            % optionally smooth the bathymetry (ocean cells only)
+            if (par_topo_smooth > 0)
+                [go_topo] = fun_grid_topo_smooth(go_topo,go_mask,par_topo_smooth);
+                fprintf('       - Bathymetry smoothed (%i pass(es), ocean cells only).\n',par_topo_smooth);
+            end
             % convert depth into k levels (and create k1 grid)
             [go_k1] = find_grid_k(par_min_Dk,go_dm,go_de,go_mask,go_topo);
             fprintf('       - Bathymetry re-gridding complete.\n')
