@@ -247,6 +247,8 @@ function [] = muffingen(POPT)
 %             *** v0.9.25 *************************************************
 %   24/02/20: fixes for high res SEDGEM grids by Alexandre Pohl
 %             *** v0.9.26 *************************************************
+%   26/09/16: removed opt_makeents=true default
+%             *** v0.9.27 *************************************************
 %
 %   ***********************************************************************
 %%
@@ -262,7 +264,7 @@ disp(['>>> INITIALIZING ...']);
 % set function name
 str_function = 'muffingen';
 % set version!
-str_muffingen_ver = 'v0.9.26';
+str_muffingen_ver = 'v0.9.27';
 % set date
 str_date = [datestr(date,11), datestr(date,5), datestr(date,7)];
 % close existing plot windows
@@ -280,7 +282,7 @@ eval(POPT);
 % zonal wind-stress generaton parameter
 if ~exist('par_tauopt','var'),   par_tauopt   = 0; end
 % ENTS-enabled output??
-if ~exist('opt_makeents','var'), opt_makeents = true; end
+if ~exist('opt_makeents','var'), opt_makeents = false; end
 % surface layer reference thickness (m)
 if ~exist('par_sur_D','var'),    par_sur_D    = 0.0; end
 % minimum k level
@@ -291,6 +293,11 @@ if ~exist('opt_plots','var'),    opt_plots    = true; end
 if ~exist('opt_debug','var'),    opt_debug    = false; end
 % make zonal winds (rather than re-grid GCM)?
 if ~exist('opt_makezonalwind','var'), opt_makezonalwind = false; end
+% route the S polar island path along the first all-ocean row at least
+% this deep (m) (0 = follow the coast)
+if ~exist('par_polepath_Dmin','var'), par_polepath_Dmin = 0; end
+% number of bathymetry smoothing passes before levels are assigned (0 = off)
+if ~exist('par_topo_smooth','var'), par_topo_smooth = 0; end
 % set dummy mask nc name
 % NOTE: backwards compatability provided by
 %       subsequent default variable name setting
@@ -989,6 +996,11 @@ if opt_maketopo
         case {'k1','k2'}
             disp(['         (Nothing to re-grid as k1 file already loaded.)']);
         otherwise
+            % optionally smooth the bathymetry (ocean cells only)
+            if (par_topo_smooth > 0)
+                [go_topo] = fun_grid_topo_smooth(go_topo,go_mask,par_topo_smooth);
+                fprintf('       - Bathymetry smoothed (%i pass(es), ocean cells only).\n',par_topo_smooth);
+            end
             % convert depth into k levels (and create k1 grid)
             [go_k1] = find_grid_k(par_min_Dk,go_dm,go_de,go_mask,go_topo);
             fprintf('       - Bathymetry re-gridding complete.\n')
@@ -1153,6 +1165,16 @@ if opt_makeocean
     disp(['>  ' num2str(n_step) '. GENERATING .paths FILE ...']);
     % create paths
     [n_paths,v_paths,n_islands,go_paths] = find_grid_paths(go_borders,n_islands,i_poles);
+    % optionally route the S polar island path through deep water
+    if (par_polepath_Dmin > 0)
+        [n_paths,v_paths,loc_paths,loc_info] = find_grid_polepath_offshore( ...
+            n_paths,v_paths,go_mask,go_k1,go_islands,i_poles,go_de,par_polepath_Dmin);
+        if loc_info.moved
+            go_paths = loc_paths;
+            fprintf('       - S polar island path moved offshore to j = %i (%i steps; was %i, %i of them shallower than %g m)\n', ...
+                loc_info.j,n_paths(end),loc_info.n_before,loc_info.n_shelf_before,par_polepath_Dmin);
+        end
+    end
     % plot paths data
     if (opt_plots), plot_2dgridded(flipud(go_paths),999,'',[[str_dirout '/' str_nameout] '.paths_out.FINAL'],['Paths file -- FINAL']); end
     % save .paths file
@@ -1400,7 +1422,8 @@ if opt_makealbedo
             xlabel('Latitude');
             ylabel('Albedo');
             title('Zonally averaged planetary albedo profile');
-            print('-dpsc2', [[str_dirout '/' str_nameout] '.zonalalbd_pl.' str_date '.ps']);
+            % print('-dpsc2', [[str_dirout '/' str_nameout] '.zonalalbd_pl.' str_date '.ps']);
+            exportgraphics(gcf,[[str_dirout '/' str_nameout] '.zonalalbd_pl.' str_date '.png'],'ContentType','image');
             % reorientate albedo vector for saving
             vo_albd = fliplr(vo_albd);
     end
@@ -1486,7 +1509,8 @@ if opt_makeents
             axis([-90 90 0.0 1.0]);
             xlabel('Latitude'); ylabel('Cloud albedo');
             title('Zonally averaged cloud albedo profile');
-            print('-dpsc2', [[str_dirout '/' str_nameout] '.zonalalbd_cl.' str_date '.ps']);
+            % print('-dpsc2', [[str_dirout '/' str_nameout] '.zonalalbd_cl.' str_date '.ps']);
+            exportgraphics(gcf,[[str_dirout '/' str_nameout] '.zonalalbd_cl.' str_date '.png'],'ContentType','image');
             % reorientate albedo vector for saving
             vo_albd_cl = fliplr(vo_albd_cl);
 			% convert cloud albedo to 2D format for usage in ENTS
