@@ -1399,8 +1399,15 @@ if opt_makealbedo
         case {'hadcm3','hadcm3l','foam','cesm','cmip6','rockee'}
             % re-grid
             [go_albd,go_falbd] = make_regrid_2d(gi_lonae,gi_latae,gi_albd',go_lone,go_late,opt_debug);
-            go_albd  = go_albd';  go_albd  = flipud(go_albd);
-            go_falbd = go_falbd'; go_falbd = flipud(go_falbd);
+            go_albd  = go_albd';
+            go_falbd = go_falbd';
+            % NOTE: the CMIP6 albedo is read in S-to-N row order (as in the
+            %       netCDF file) while all other GCM readers return N-to-S
+            %       => only CMIP6 needs flipping to the map orientation
+            if strcmp(str(1).gcm,'cmip6')
+                go_albd  = flipud(go_albd);
+                go_falbd = flipud(go_falbd);
+            end
             disp(['       - Re-gridded GCM planetary albedo data.']);
             % plot output albedo
             if (opt_plots), plot_2dgridded(flipud(go_albd),100.0,'',[[str_dirout '/' str_nameout] '.albd_pl_out'],['albedo out']); end
@@ -1473,13 +1480,13 @@ if opt_makeents
         case {'hadcm3','hadcm3l','foam'}
             % re-grid surface albedo
             [go_albd_sur,go_falbd_sur] = make_regrid_2d(gi_lonae,gi_latae,gi_albd_sur',go_lone,go_late,opt_debug);
-            go_albd_sur  = go_albd_sur';  go_albd_sur  = flipud(go_albd_sur);
-            go_falbd_sur = go_falbd_sur'; go_falbd_sur = flipud(go_falbd_sur);
+            go_albd_sur  = go_albd_sur';
+            go_falbd_sur = go_falbd_sur';
             disp(['       - Re-gridded GCM surface albedo data.']);
             % re-grid cloud albedo
             [go_albd_cl,go_falbd_cl] = make_regrid_2d(gi_lonae,gi_latae,gi_albd_cl',go_lone,go_late,opt_debug);
-            go_albd_cl  = go_albd_cl';  go_albd_cl  = flipud(go_albd_cl);
-            go_falbd_cl = go_falbd_cl'; go_falbd_cl = flipud(go_falbd_cl);
+            go_albd_cl  = go_albd_cl';
+            go_falbd_cl = go_falbd_cl';
             disp(['       - Re-gridded GCM cloud albedo data.']);
             % plot surface and cloud albedo output
             if (opt_plots)
