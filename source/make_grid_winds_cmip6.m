@@ -82,8 +82,10 @@ golonve = golone;
 gm = gomask; gm(gm==0) = NaN;
 
 % --- Regrid wind stress to GOLDSTEIN u/v grids ---
-if (optplots), plot_2dgridded(flipud(giwtauu),999.0,'',[[str(2).dir '/' str(2).exp] '.wtau_u.IN'],['wind stress in -- u']); end
-if (optplots), plot_2dgridded(flipud(giwtauv),999.0,'',[[str(2).dir '/' str(2).exp] '.wtau_v.IN'],['wind stress in -- v']); end
+% NOTE: the CMIP6 input fields are in S-to-N row order (as read), which is
+%       the orientation plot_2dgridded takes => the .IN plots need no flipud
+if (optplots), plot_2dgridded(giwtauu,999.0,'',[[str(2).dir '/' str(2).exp] '.wtau_u.IN'],['wind stress in -- u']); end
+if (optplots), plot_2dgridded(giwtauv,999.0,'',[[str(2).dir '/' str(2).exp] '.wtau_v.IN'],['wind stress in -- v']); end
 
 % u: taux(y) at u grid -- apply ocean mask to input to exclude land values
 % NOTE: gimaskp is derived from gi_mask which has flipud applied in fun_read_topomask_cmip6,
@@ -105,28 +107,28 @@ if (optplots), plot_2dgridded(flipud(gm.*gowtauuv),999.0,'',[[str(2).dir '/' str
 if (optplots), plot_2dgridded(flipud(gm.*gowtauvv),999.0,'',[[str(2).dir '/' str(2).exp] '.wtau_yATv.out'],['wind stress out -- y @ v']); end
 
 % --- Regrid wind velocity (uas/vas) to GOLDSTEIN c-grid ---
-if (optplots), plot_2dgridded(flipud(giwvelu),999.0,'',[[str(2).dir '/' str(2).exp] '.wvel_x.IN'],['wind velocity in -- x']); end
+if (optplots), plot_2dgridded(giwvelu,999.0,'',[[str(2).dir '/' str(2).exp] '.wvel_x.IN'],['wind velocity in -- x']); end
 [gowvelu,~] = make_regrid_2d(gilone,gilate,giwvelu',golone,golate,false);
 gowvelu(isnan(gowvelu)) = 0.0; gowvelu = gowvelu'; gowvelu = flipud(gowvelu);
 if (optplots), plot_2dgridded(flipud(gowvelu),999.0,'',[[str(2).dir '/' str(2).exp] '.wvel_x.OUT'],['wind velocity out -- x']); end
 
-if (optplots), plot_2dgridded(flipud(giwvelv),999.0,'',[[str(2).dir '/' str(2).exp] '.wvel_y.IN'],['wind velocity in -- y']); end
+if (optplots), plot_2dgridded(giwvelv,999.0,'',[[str(2).dir '/' str(2).exp] '.wvel_y.IN'],['wind velocity in -- y']); end
 [gowvelv,~] = make_regrid_2d(gilone,gilate,giwvelv',golone,golate,false);
 gowvelv(isnan(gowvelv)) = 0.0; gowvelv = gowvelv'; gowvelv = flipud(gowvelv);
 if (optplots), plot_2dgridded(flipud(gowvelv),999.0,'',[[str(2).dir '/' str(2).exp] '.wvel_y.OUT'],['wind velocity out -- y']); end
 
 % --- Regrid wind speed (scalar) to GOLDSTEIN c-grid; save masked/unmasked variants used elsewhere ---
-if (optplots), plot_2dgridded(flipud(giwspd_uvaa),999.0,'',[[str(2).dir '/' str(2).exp] '.wspd_uvaa.IN'],['wind speed in']); end
+if (optplots), plot_2dgridded(giwspd_uvaa,999.0,'',[[str(2).dir '/' str(2).exp] '.wspd_uvaa.IN'],['wind speed in']); end
 [gowspdall,~] = make_regrid_2d(gilone,gilate,giwspd_uvaa',golone,golate,false);
 gowspdall = gowspdall'; gowspdall = flipud(gowspdall);
 wspeed_uvaa = gomask.*gowspdall; wspeed_uvaa(isnan(wspeed_uvaa)) = 0.0;
 
-if (optplots), plot_2dgridded(flipud(giwspd_uvma),999.0,'',[[str(2).dir '/' str(2).exp] '.wspd_uvma.IN'],['wind speed in']); end
+if (optplots), plot_2dgridded(giwspd_uvma,999.0,'',[[str(2).dir '/' str(2).exp] '.wspd_uvma.IN'],['wind speed in']); end
 [gowspdall,~] = make_regrid_2d(gilone,gilate,giwspd_uvma',golone,golate,false);
 gowspdall = gowspdall'; gowspdall = flipud(gowspdall);
 wspeed_uvma = gomask.*gowspdall; wspeed_uvma(isnan(wspeed_uvma)) = 0.0;
 
-if (optplots), plot_2dgridded(flipud(giwspd_wsma),999.0,'',[[str(2).dir '/' str(2).exp] '.wspd_wsma.IN'],['wind speed in']); end
+if (optplots), plot_2dgridded(giwspd_wsma,999.0,'',[[str(2).dir '/' str(2).exp] '.wspd_wsma.IN'],['wind speed in']); end
 [gowspdall,~] = make_regrid_2d(gilone,gilate,giwspd_wsma',golone,golate,false);
 gowspdall = gowspdall'; gowspdall = flipud(gowspdall);
 wspeed_wsma = gomask.*gowspdall; wspeed_wsma(isnan(wspeed_wsma)) = 0.0;

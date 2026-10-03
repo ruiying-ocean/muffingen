@@ -1380,7 +1380,15 @@ if opt_makealbedo
             end
             disp(['       - Read GCM albedo data.']);
             % plot input albedo
-            if (opt_plots), plot_2dgridded(flipud(gi_albd),100.0,'',[[str_dirout '/' str_nameout] '.albd_pl_in'],['planetary albedo in']); end
+            % NOTE: the CMIP6 albedo is read in S-to-N row order, which is
+            %       the orientation plot_2dgridded takes => no flipud
+            if (opt_plots)
+                if strcmp(str(1).gcm,'cmip6')
+                    plot_2dgridded(gi_albd,100.0,'',[[str_dirout '/' str_nameout] '.albd_pl_in'],['planetary albedo in']);
+                else
+                    plot_2dgridded(flipud(gi_albd),100.0,'',[[str_dirout '/' str_nameout] '.albd_pl_in'],['planetary albedo in']);
+                end
+            end
         otherwise
             disp(['         (Nothing to load.)']);
     end
