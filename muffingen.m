@@ -253,6 +253,8 @@ function [] = muffingen(POPT)
 %             calibrated with the CMIP6 piControl mean (CESM's unchanged)
 %             optional par_gastransfer_a replaces the calibrated coefficient
 %             (for winds that are not those it was calibrated with, e.g. ERA5)
+%             CMIP6 coefficients re-calibrated on worjh2 with its
+%             pre-industrial control (in place of GIteiiva)
 %
 %   ***********************************************************************
 %%
@@ -1798,19 +1800,21 @@ elseif (opt_makewind)
             end
         case {'cmip6'}
             % NOTE: calibrated (26/10/16) with the CMIP6 piControl 10-model mean
-            %       (annual and monthly), re-gridded onto GIteiiva, with Sc and
-            %       solubility from the GIteiiva Holocene-control surface ocean
+            %       (annual and monthly), re-gridded onto worjh2, with Sc and
+            %       solubility per cell from the worjh2 pre-industrial control
+            %       (muffin.CBE.worjh2.PO4FeSi.ctrl), for BIOGEM's global mean
+            %       K(CO2) (weighted by open water) of 0.058 on worjh2
             fprintf(fid,'%s\n','# gas transfer coeff');
             switch str(1).wspd
                 case {'uvaa'}
-                    % NOTE: @ 0.310 --> 0.017647 mol m-2 yr-1 uatm-1
-                    fprintf(fid,'%s\n',['bg_par_gastransfer_a=',num2str(fun_gastransfer_a(par_gastransfer_a,1.019))]);
+                    % NOTE: @ 0.310 --> 0.016827 mol m-2 yr-1 uatm-1
+                    fprintf(fid,'%s\n',['bg_par_gastransfer_a=',num2str(fun_gastransfer_a(par_gastransfer_a,1.069))]);
                 case {'uvma'}
-                    % NOTE: @ 0.310 --> 0.020127 mol m-2 yr-1 uatm-1
-                    fprintf(fid,'%s\n',['bg_par_gastransfer_a=',num2str(fun_gastransfer_a(par_gastransfer_a,0.8933))]);
+                    % NOTE: @ 0.310 --> 0.019383 mol m-2 yr-1 uatm-1
+                    fprintf(fid,'%s\n',['bg_par_gastransfer_a=',num2str(fun_gastransfer_a(par_gastransfer_a,0.9276))]);
                 case {'wsma'}
-                    % NOTE: @ 0.310 --> 0.053153 mol m-2 yr-1 uatm-1
-                    fprintf(fid,'%s\n',['bg_par_gastransfer_a=',num2str(fun_gastransfer_a(par_gastransfer_a,0.3383))]);
+                    % NOTE: @ 0.310 --> 0.050900 mol m-2 yr-1 uatm-1
+                    fprintf(fid,'%s\n',['bg_par_gastransfer_a=',num2str(fun_gastransfer_a(par_gastransfer_a,0.3532))]);
             end
         otherwise
             % zonal field
