@@ -249,6 +249,8 @@ function [] = muffingen(POPT)
 %             *** v0.9.26 *************************************************
 %   26/09/16: removed opt_makeents=true default
 %             *** v0.9.27 *************************************************
+%   26/10/16: CMIP6 gets its own air-sea gas transfer coefficients,
+%             calibrated with the CMIP6 piControl mean (CESM's unchanged)
 %
 %   ***********************************************************************
 %%
@@ -1775,7 +1777,7 @@ elseif (opt_makewind)
         case {'foam'}
             fprintf(fid,'%s\n','# gas transfer coeff');
             fprintf(fid,'%s\n',['bg_par_gastransfer_a=',num2str(1.044)]);
-        case {'cesm','cmip6'}
+        case {'cesm'}
             fprintf(fid,'%s\n','# gas transfer coeff');
             switch str(1).wspd
                 case {'uvaa'}
@@ -1787,6 +1789,22 @@ elseif (opt_makewind)
                 case {'wsma'}
                     % NOTE: @ 0.310 --> 0.051051 mol m-2 yr-1 uatm-1
                     fprintf(fid,'%s\n',['bg_par_gastransfer_a=',num2str(0.3522)]);
+            end
+        case {'cmip6'}
+            % NOTE: calibrated (26/10/16) with the CMIP6 piControl 10-model mean
+            %       (annual and monthly), re-gridded onto GIteiiva, with Sc and
+            %       solubility from the GIteiiva Holocene-control surface ocean
+            fprintf(fid,'%s\n','# gas transfer coeff');
+            switch str(1).wspd
+                case {'uvaa'}
+                    % NOTE: @ 0.310 --> 0.017647 mol m-2 yr-1 uatm-1
+                    fprintf(fid,'%s\n',['bg_par_gastransfer_a=',num2str(1.019)]);
+                case {'uvma'}
+                    % NOTE: @ 0.310 --> 0.020127 mol m-2 yr-1 uatm-1
+                    fprintf(fid,'%s\n',['bg_par_gastransfer_a=',num2str(0.8933)]);
+                case {'wsma'}
+                    % NOTE: @ 0.310 --> 0.053153 mol m-2 yr-1 uatm-1
+                    fprintf(fid,'%s\n',['bg_par_gastransfer_a=',num2str(0.3383)]);
             end
         otherwise
             % zonal field
