@@ -251,6 +251,8 @@ function [] = muffingen(POPT)
 %             *** v0.9.27 *************************************************
 %   26/10/16: CMIP6 gets its own air-sea gas transfer coefficients,
 %             calibrated with the CMIP6 piControl mean (CESM's unchanged)
+%             optional par_gastransfer_a replaces the calibrated coefficient
+%             (for winds that are not those it was calibrated with, e.g. ERA5)
 %
 %   ***********************************************************************
 %%
@@ -298,6 +300,9 @@ if ~exist('opt_makezonalwind','var'), opt_makezonalwind = false; end
 % route the S polar island path along the first all-ocean row at least
 % this deep (m) (0 = follow the coast)
 if ~exist('par_polepath_Dmin','var'), par_polepath_Dmin = 0; end
+% air-sea gas transfer coefficient written to the config file
+% ([] = the one calibrated for the input format and wind-speed product)
+if ~exist('par_gastransfer_a','var'), par_gastransfer_a = []; end
 % number of bathymetry smoothing passes before levels are assigned (0 = off)
 if ~exist('par_topo_smooth','var'), par_topo_smooth = 0; end
 % set dummy mask nc name
@@ -1752,7 +1757,7 @@ if (opt_makezonalwind)
     fprintf(fid,'%s\n','# Boundary conditions: BIOGEM');
     fprintf(fid,'%s\n',['bg_ctrl_force_windspeed=.false.']);
     fprintf(fid,'%s\n','# gas transfer coeff');
-    fprintf(fid,'%s\n',['bg_par_gastransfer_a=',num2str(0.722)]);
+    fprintf(fid,'%s\n',['bg_par_gastransfer_a=',num2str(fun_gastransfer_a(par_gastransfer_a,0.722))]);
 elseif (opt_makewind)
     fprintf(fid,'%s\n','# Boundary conditions: BIOGEM');
     % windspeed
@@ -1770,25 +1775,26 @@ elseif (opt_makewind)
     % NOTE: re-scale to give a modern global mean air-sea coefficient of
     %       ~0.058 mol m-2 yr-1 uatm-1
     %       (default is bg_par_gastransfer_a=0.310)
+    %       par_gastransfer_a, if set, replaces each value below
     switch str(1).gcm
         case {'hadcm3','hadcm3l'}
             fprintf(fid,'%s\n','# gas transfer coeff');
-            fprintf(fid,'%s\n',['bg_par_gastransfer_a=',num2str(0.904)]);
+            fprintf(fid,'%s\n',['bg_par_gastransfer_a=',num2str(fun_gastransfer_a(par_gastransfer_a,0.904))]);
         case {'foam'}
             fprintf(fid,'%s\n','# gas transfer coeff');
-            fprintf(fid,'%s\n',['bg_par_gastransfer_a=',num2str(1.044)]);
+            fprintf(fid,'%s\n',['bg_par_gastransfer_a=',num2str(fun_gastransfer_a(par_gastransfer_a,1.044))]);
         case {'cesm'}
             fprintf(fid,'%s\n','# gas transfer coeff');
             switch str(1).wspd
                 case {'uvaa'}
                     % NOTE: @ 0.310 --> 0.027482 mol m-2 yr-1 uatm-1
-                    fprintf(fid,'%s\n',['bg_par_gastransfer_a=',num2str(0.6542)]);
+                    fprintf(fid,'%s\n',['bg_par_gastransfer_a=',num2str(fun_gastransfer_a(par_gastransfer_a,0.6542))]);
                 case {'uvma'}
                     % NOTE: @ 0.310 --> 0.031064 mol m-2 yr-1 uatm-1
-                    fprintf(fid,'%s\n',['bg_par_gastransfer_a=',num2str(0.5788)]);
+                    fprintf(fid,'%s\n',['bg_par_gastransfer_a=',num2str(fun_gastransfer_a(par_gastransfer_a,0.5788))]);
                 case {'wsma'}
                     % NOTE: @ 0.310 --> 0.051051 mol m-2 yr-1 uatm-1
-                    fprintf(fid,'%s\n',['bg_par_gastransfer_a=',num2str(0.3522)]);
+                    fprintf(fid,'%s\n',['bg_par_gastransfer_a=',num2str(fun_gastransfer_a(par_gastransfer_a,0.3522))]);
             end
         case {'cmip6'}
             % NOTE: calibrated (26/10/16) with the CMIP6 piControl 10-model mean
@@ -1798,13 +1804,13 @@ elseif (opt_makewind)
             switch str(1).wspd
                 case {'uvaa'}
                     % NOTE: @ 0.310 --> 0.017647 mol m-2 yr-1 uatm-1
-                    fprintf(fid,'%s\n',['bg_par_gastransfer_a=',num2str(1.019)]);
+                    fprintf(fid,'%s\n',['bg_par_gastransfer_a=',num2str(fun_gastransfer_a(par_gastransfer_a,1.019))]);
                 case {'uvma'}
                     % NOTE: @ 0.310 --> 0.020127 mol m-2 yr-1 uatm-1
-                    fprintf(fid,'%s\n',['bg_par_gastransfer_a=',num2str(0.8933)]);
+                    fprintf(fid,'%s\n',['bg_par_gastransfer_a=',num2str(fun_gastransfer_a(par_gastransfer_a,0.8933))]);
                 case {'wsma'}
                     % NOTE: @ 0.310 --> 0.053153 mol m-2 yr-1 uatm-1
-                    fprintf(fid,'%s\n',['bg_par_gastransfer_a=',num2str(0.3383)]);
+                    fprintf(fid,'%s\n',['bg_par_gastransfer_a=',num2str(fun_gastransfer_a(par_gastransfer_a,0.3383))]);
             end
         otherwise
             % zonal field
@@ -1820,18 +1826,18 @@ elseif (opt_makewind)
                     % (low) modern NH / paleo Eocene (both hemispheres)
                     % (0.0201 mol m-2 yr-1 uatm-1 @ a=0.310)
                     fprintf(fid,'%s\n','# gas transfer coeff');
-                    fprintf(fid,'%s\n',['bg_par_gastransfer_a=',num2str(0.722)]);
+                    fprintf(fid,'%s\n',['bg_par_gastransfer_a=',num2str(fun_gastransfer_a(par_gastransfer_a,0.722))]);
                 case {2}
                     % (high) water world
                     % (0.0297 mol m-2 yr-1 uatm-1 @ a=0.310)
                     fprintf(fid,'%s\n','# gas transfer coeff');
-                    fprintf(fid,'%s\n',['bg_par_gastransfer_a=',num2str(0.722)]);
+                    fprintf(fid,'%s\n',['bg_par_gastransfer_a=',num2str(fun_gastransfer_a(par_gastransfer_a,0.722))]);
                 otherwise
                     % intermediate case
                     % (0.024903 mol m-2 yr-1 uatm-1 @ a=0.310)
                     % NOTE: this is the 'automatically' determined case
                     fprintf(fid,'%s\n','# gas transfer coeff');
-                    fprintf(fid,'%s\n',['bg_par_gastransfer_a=',num2str(0.722)]);
+                    fprintf(fid,'%s\n',['bg_par_gastransfer_a=',num2str(fun_gastransfer_a(par_gastransfer_a,0.722))]);
             end
     end
 end
